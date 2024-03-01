@@ -39,6 +39,7 @@ reportlab
 requests
 requests-oauthlib
 ruff
+stripe
 tabulate
 unicodecsv
 vobject

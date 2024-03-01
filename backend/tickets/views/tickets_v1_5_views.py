@@ -12,6 +12,7 @@ from django.views.decorators.http import require_http_methods
 
 from core.utils import initialize_form
 from payments.models.checkout_payment import CHECKOUT_PAYMENT_WALL_ORIGIN, CheckoutPayment
+from payments.models.stripe_payment import STRIPE_PAYMENT_WALL_ORIGIN, StripePayment
 
 from ..forms import CustomerForm, OrderProductForm
 from ..helpers import tickets_event_required
@@ -27,7 +28,7 @@ def tickets_router_view(request, event, *args, **kwargs):
         return tickets_welcome_view(request, event.slug, *args, **kwargs)
 
 
-@csp_update(FORM_ACTION=CHECKOUT_PAYMENT_WALL_ORIGIN)
+@csp_update(FORM_ACTION=CHECKOUT_PAYMENT_WALL_ORIGIN + " " + STRIPE_PAYMENT_WALL_ORIGIN)
 def tickets_view(request, event):
     order = get_order(request, event)
     if order.is_confirmed:
@@ -88,7 +89,11 @@ def tickets_view(request, event):
 
         order.confirm_order()
 
-        payment = CheckoutPayment.from_order(order)
+        # TODO: option to select which payment to use
+        if True:
+            payment = CheckoutPayment.from_order(order)
+        else:
+            payment = StripePayment.from_order(order)
         payment.save()
 
     # does an API call to Paytrail so we need to do it after the transaction
@@ -138,7 +143,11 @@ def tickets_confirmed_view(request, event, order):
                 if order.is_paid:
                     messages.error(request, _("This order has already been paid."))
                 else:
-                    payment = CheckoutPayment.from_order(order)
+                    # TODO: Get correct option from somewhere
+                    if True:
+                        payment = CheckoutPayment.from_order(order)
+                    else:
+                        payment = StripePayment.from_order(order)
                     payment.save()
 
                     # does an API call to Paytrail so we need to do it after the transaction

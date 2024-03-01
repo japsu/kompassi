@@ -10,7 +10,7 @@ from .utils import calculate_hmac
 logger = logging.getLogger("kompassi")
 
 
-def valid_signature_required(view_func):
+def valid_checkout_signature_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         stamp = request.GET.get("checkout-stamp")
